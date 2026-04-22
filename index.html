@@ -1,0 +1,777 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>PAMOJA — Portfolio Performance Dashboard</title>
+<meta name="description" content="Interactive dashboard of PAMOJA programme results across 7 African countries — reporting period Aug 2025 – Feb 2026." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --yellow:#F8C501;
+  --yellow-soft:#FFE8A3;
+  --cream:#FFF9EC;
+  --purple:#49267A;
+  --purple-dark:#2F1650;
+  --purple-soft:#EAE1F1;
+  --magenta:#E62B67;
+  --magenta-soft:#FDE4ED;
+  --ink:#1A1A1A;
+  --ink-soft:#4A4A4A;
+  --line:#E7E3EC;
+  --bg:#FAFAFB;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:'Inter',system-ui,-apple-system,sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:var(--purple);text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* ============ HEADER ============ */
+header{
+  background:linear-gradient(135deg,var(--purple) 0%,var(--purple-dark) 100%);
+  color:#fff;
+  padding:28px 36px 18px;
+  position:relative;
+  overflow:hidden;
+}
+header .star{position:absolute;color:rgba(248,197,1,.2);font-size:140px;line-height:1;user-select:none;pointer-events:none}
+header .star.s1{top:-20px;right:40px}
+header .star.s2{bottom:-40px;left:10px;font-size:90px;color:rgba(230,43,103,.25)}
+header .brand{font-family:'Playfair Display',serif;font-weight:800;font-size:32px;letter-spacing:.5px;display:flex;align-items:center;gap:12px}
+header .brand .mark{display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border:2px solid var(--yellow);border-radius:50%;color:var(--yellow);font-size:22px}
+header .title{font-size:36px;font-weight:800;margin:14px 0 6px;letter-spacing:-.5px;font-family:'Playfair Display',serif}
+header .subtitle{font-size:15px;opacity:.85;max-width:780px}
+header .period{display:inline-flex;align-items:center;gap:8px;background:rgba(248,197,1,.15);color:var(--yellow);padding:6px 14px;border-radius:999px;font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-top:10px}
+header .period::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--yellow)}
+
+/* ============ NAV / FILTERS ============ */
+nav.filters{
+  background:#fff;
+  border-bottom:1px solid var(--line);
+  padding:14px 36px;
+  position:sticky;top:0;z-index:20;
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  box-shadow:0 1px 3px rgba(0,0,0,.03);
+}
+.chip{
+  padding:7px 14px;border-radius:999px;border:1px solid var(--line);
+  background:#fff;color:var(--ink-soft);
+  font-size:13px;font-weight:500;cursor:pointer;
+  transition:all .15s ease;
+}
+.chip:hover{border-color:var(--purple);color:var(--purple)}
+.chip.active{background:var(--purple);color:#fff;border-color:var(--purple)}
+.chip .count{opacity:.7;margin-left:6px;font-size:11px}
+.filters .label{font-size:12px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:1.5px;margin-right:4px;font-weight:600}
+
+/* ============ SECTIONS ============ */
+main{padding:28px 36px 80px;max-width:1400px;margin:0 auto}
+section{margin-bottom:44px}
+.section-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:12px}
+.section-head h2{
+  font-size:22px;font-weight:700;margin:0;
+  color:var(--ink);font-family:'Playfair Display',serif;
+  letter-spacing:-.3px;
+}
+.section-head .kicker{
+  font-size:11px;font-weight:700;letter-spacing:2px;
+  text-transform:uppercase;color:var(--purple);
+}
+.section-head p{margin:4px 0 0;color:var(--ink-soft);font-size:14px}
+
+/* ============ KPI CARDS ============ */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+.kpi{
+  background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 18px 16px;
+  position:relative;overflow:hidden;transition:transform .15s ease,box-shadow .15s ease;
+}
+.kpi:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(73,38,122,.08)}
+.kpi .bar{position:absolute;top:0;left:0;right:0;height:4px;background:var(--magenta)}
+.kpi.kpi-purple .bar{background:var(--purple)}
+.kpi.kpi-yellow .bar{background:var(--yellow)}
+.kpi.kpi-ink .bar{background:var(--ink)}
+.kpi .n{font-size:34px;font-weight:800;color:var(--purple);line-height:1.05;font-family:'Playfair Display',serif;letter-spacing:-.5px}
+.kpi.kpi-magenta .n{color:var(--magenta)}
+.kpi.kpi-ink .n{color:var(--ink)}
+.kpi .l{font-size:14px;font-weight:600;color:var(--ink);margin-top:8px}
+.kpi .s{font-size:11.5px;color:var(--ink-soft);margin-top:4px;line-height:1.4}
+
+/* ============ LAYOUT TWO-COL ============ */
+.two-col{display:grid;grid-template-columns:1.1fr 1.5fr;gap:22px;align-items:start}
+@media (max-width:1024px){.two-col{grid-template-columns:1fr}}
+
+/* ============ MAP ============ */
+.card{
+  background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px;
+}
+.card h3{margin:0 0 14px;font-size:15px;font-weight:700;color:var(--ink)}
+.card h3 .muted{font-weight:400;color:var(--ink-soft);font-size:13px;margin-left:8px}
+#map{width:100%;aspect-ratio:4/5;max-height:580px;display:block}
+#map .country-path{fill:#E9E5EE;stroke:#fff;stroke-width:.5;transition:fill .2s ease}
+#map .country-path.pamoja{fill:var(--yellow);cursor:pointer;stroke:#fff;stroke-width:1}
+#map .country-path.pamoja:hover{fill:var(--magenta)}
+#map .country-path.pamoja.selected{fill:var(--magenta);stroke:var(--purple);stroke-width:1.5}
+.map-legend{display:flex;gap:14px;margin-top:14px;font-size:12px;color:var(--ink-soft);flex-wrap:wrap}
+.map-legend .sw{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+
+/* ============ DETAIL PANEL ============ */
+.detail-panel{min-height:580px}
+.detail-panel.empty{display:flex;align-items:center;justify-content:center;text-align:center;color:var(--ink-soft);font-size:14px;padding:60px 30px}
+.country-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--line)}
+.country-head h3{font-size:24px;margin:0;font-family:'Playfair Display',serif;font-weight:800;color:var(--ink)}
+.country-head .tag{background:var(--purple);color:var(--yellow);font-size:10px;font-weight:700;letter-spacing:1.5px;padding:4px 10px;border-radius:999px;text-transform:uppercase}
+.country-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}
+.country-stats .s{background:var(--cream);border-radius:10px;padding:12px 14px}
+.country-stats .s .v{font-size:22px;font-weight:800;color:var(--magenta);font-family:'Playfair Display',serif}
+.country-stats .s .k{font-size:11px;color:var(--ink-soft);margin-top:2px}
+.country-story{font-size:13px;color:var(--ink);line-height:1.65;margin-bottom:16px}
+.country-story b{color:var(--purple)}
+.iptt-list{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.iptt-list .row{background:#fff;border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center}
+.iptt-list .row .lbl{font-size:11.5px;color:var(--ink-soft);line-height:1.3}
+.iptt-list .row .val{font-size:18px;font-weight:800;color:var(--purple);font-family:'Playfair Display',serif}
+.next-phase{background:linear-gradient(135deg,var(--magenta-soft),#fff);border-left:4px solid var(--magenta);padding:12px 14px;border-radius:8px;font-size:12.5px}
+.next-phase b{color:var(--magenta);display:block;margin-bottom:4px;letter-spacing:.5px;text-transform:uppercase;font-size:10px}
+
+/* ============ TABLE ============ */
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{
+  text-align:left;font-size:10.5px;font-weight:700;
+  color:var(--purple);letter-spacing:1.2px;text-transform:uppercase;
+  padding:12px 10px;border-bottom:2px solid var(--purple);background:var(--cream);
+}
+tbody td{padding:12px 10px;border-bottom:1px solid var(--line);color:var(--ink)}
+tbody tr:hover{background:var(--cream);cursor:pointer}
+tbody tr.total td{background:var(--purple);color:#fff;font-weight:700;border-bottom:none}
+tbody tr.total td:first-child{border-radius:0 0 0 8px}
+tbody tr.total td:last-child{border-radius:0 0 8px 0}
+td .pct-bar{position:relative;display:block;height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin-top:4px;width:80px}
+td .pct-bar span{position:absolute;top:0;left:0;bottom:0;background:var(--magenta);border-radius:3px}
+tbody td.num{font-variant-numeric:tabular-nums;font-weight:600}
+tbody td.dash{color:#BDBDBD}
+
+/* ============ CHARTS ============ */
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+@media (max-width:900px){.chart-grid{grid-template-columns:1fr}}
+.chart-wrap{position:relative;height:330px}
+
+/* ============ CAMPAIGN CARDS ============ */
+.camp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.camp{
+  background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px;
+  position:relative;overflow:hidden;display:flex;flex-direction:column;transition:all .2s ease;
+}
+.camp:hover{border-color:var(--magenta);box-shadow:0 8px 24px rgba(230,43,103,.1)}
+.camp .edge{position:absolute;top:0;left:0;bottom:0;width:5px;background:var(--magenta)}
+.camp h4{margin:0 0 4px;font-size:17px;font-weight:800;color:var(--ink);font-family:'Playfair Display',serif}
+.camp .meta{font-size:10.5px;color:var(--purple);font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px}
+.camp .agency{font-size:11px;color:var(--ink-soft);font-style:italic;margin-bottom:10px}
+.camp .reach{display:flex;gap:14px;margin:12px 0}
+.camp .reach .item .v{font-size:20px;font-weight:800;color:var(--magenta);font-family:'Playfair Display',serif;line-height:1}
+.camp .reach .item .k{font-size:10.5px;color:var(--ink-soft);margin-top:3px}
+.camp .desc{font-size:12.5px;color:var(--ink);line-height:1.55;flex:1}
+.camp .signal{font-size:11px;color:var(--purple);background:var(--cream);padding:7px 10px;border-radius:6px;margin-top:12px;border-left:3px solid var(--yellow)}
+.camp .channels{margin-top:10px;font-size:10px;color:var(--ink-soft);font-family:monospace;letter-spacing:.5px}
+
+/* ============ INNOVATIONS ============ */
+.innov-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.innov{
+  background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px;
+  position:relative;overflow:hidden;transition:all .2s ease;
+}
+.innov:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(73,38,122,.08)}
+.innov .edge{position:absolute;top:0;left:0;right:0;height:4px;background:var(--magenta)}
+.innov-purple .edge{background:var(--purple)}
+.innov-yellow .edge{background:var(--yellow)}
+.innov-ink .edge{background:var(--ink)}
+.innov h4{margin:0 0 10px;font-size:17px;font-weight:800;color:var(--ink);font-family:'Playfair Display',serif;letter-spacing:-.2px}
+.innov p{margin:0;font-size:13px;color:var(--ink-soft);line-height:1.6}
+.innov p b{color:var(--magenta);font-weight:600}
+
+/* ============ FOOTER ============ */
+footer{
+  background:var(--purple);color:#fff;padding:28px 36px;
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;
+  font-size:12px;
+}
+footer .left{display:flex;align-items:center;gap:14px}
+footer .left .logo{width:32px;height:32px;border:1.5px solid var(--yellow);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--yellow);font-size:16px;font-weight:700}
+footer .right{opacity:.7}
+footer a{color:var(--yellow)}
+
+/* ============ MISC ============ */
+.hidden{display:none !important}
+.banner-note{
+  background:var(--yellow-soft);border:1px solid var(--yellow);color:var(--ink);
+  padding:10px 14px;border-radius:8px;font-size:12px;margin-bottom:14px;display:flex;align-items:center;gap:8px;
+}
+.banner-note::before{content:"ⓘ";color:var(--purple);font-weight:700}
+
+/* tooltip for map */
+#map-tooltip{
+  position:fixed;pointer-events:none;background:var(--ink);color:#fff;
+  padding:8px 12px;border-radius:6px;font-size:12px;font-weight:500;
+  opacity:0;transition:opacity .15s ease;z-index:100;white-space:nowrap;
+  box-shadow:0 4px 12px rgba(0,0,0,.2);
+}
+#map-tooltip strong{color:var(--yellow);display:block;font-size:13px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="star s1">✦</div>
+  <div class="star s2">✦</div>
+  <div class="brand">
+    <span class="mark">✦</span>
+    <span>PAMOJA</span>
+  </div>
+  <h1 class="title">Portfolio Performance Dashboard</h1>
+  <div class="subtitle">RAES — large-scale reach and narrative change across seven African countries, challenging abortion stigma and building support for law reform.</div>
+  <div class="period">Reporting period · Aug 2025 – Feb 2026</div>
+</header>
+
+<nav class="filters" aria-label="Country filters">
+  <span class="label">Focus</span>
+  <button class="chip active" data-filter="all">All 7 countries <span class="count">·&nbsp;37.8M reach</span></button>
+  <button class="chip" data-filter="ZW">Zimbabwe</button>
+  <button class="chip" data-filter="MW">Malawi</button>
+  <button class="chip" data-filter="BJ">Benin</button>
+  <button class="chip" data-filter="NG">Nigeria</button>
+  <button class="chip" data-filter="KE">Kenya</button>
+  <button class="chip" data-filter="SN">Senegal</button>
+  <button class="chip" data-filter="CI">Côte d'Ivoire</button>
+</nav>
+
+<main>
+
+  <!-- ============ KPIs ============ -->
+  <section>
+    <div class="section-head">
+      <div>
+        <div class="kicker">Executive snapshot</div>
+        <h2 id="kpi-title">What the funding enabled across the portfolio</h2>
+      </div>
+    </div>
+
+    <div class="kpi-grid" id="kpi-grid">
+      <div class="kpi kpi-magenta"><div class="bar"></div><div class="n" data-kpi="reach">37,822,599</div><div class="l">Total people reached</div><div class="s">Digital + media + on-field, across 7 countries</div></div>
+      <div class="kpi kpi-purple"><div class="bar"></div><div class="n" data-kpi="digital">26,354,448</div><div class="l">Digital reach</div><div class="s">Seven-country combined digital footprint</div></div>
+      <div class="kpi kpi-yellow"><div class="bar"></div><div class="n" data-kpi="media">11,411,651</div><div class="l">Traditional media</div><div class="s">Radio & mass-media audience exposure</div></div>
+      <div class="kpi kpi-purple"><div class="bar"></div><div class="n" data-kpi="inperson">56,500</div><div class="l">In-person participants</div><div class="s">Workshops, dialogues, public activations</div></div>
+      <div class="kpi kpi-magenta"><div class="bar"></div><div class="n" data-kpi="contents">689</div><div class="l">Contents produced</div><div class="s">Across digital platforms & mass media channels</div></div>
+      <div class="kpi kpi-ink"><div class="bar"></div><div class="n" data-kpi="partners">40</div><div class="l" data-kpi-label="partners">Partnerships mobilized</div><div class="s" data-kpi-sub="partners">Local CSOs and creative agencies</div></div>
+    </div>
+  </section>
+
+  <!-- ============ MAP + DETAIL ============ -->
+  <section>
+    <div class="section-head">
+      <div>
+        <div class="kicker">Country drill-down</div>
+        <h2>Click a country to view its story &amp; indicators</h2>
+      </div>
+    </div>
+    <div class="two-col">
+      <div class="card">
+        <h3>Portfolio footprint <span class="muted">— tap a country</span></h3>
+        <svg id="map" viewBox="0 0 500 600" preserveAspectRatio="xMidYMid meet" aria-label="Map of Africa highlighting PAMOJA countries"></svg>
+        <div class="map-legend">
+          <span><span class="sw" style="background:var(--yellow)"></span>PAMOJA country</span>
+          <span><span class="sw" style="background:var(--magenta)"></span>Selected</span>
+          <span><span class="sw" style="background:#E9E5EE"></span>Other</span>
+        </div>
+      </div>
+      <div class="card detail-panel" id="detail">
+        <div style="padding:60px 30px;text-align:center;color:var(--ink-soft)">
+          <div style="font-size:48px;color:var(--yellow);margin-bottom:8px">✦</div>
+          <div style="font-size:14px">Select a country on the map or from the filter bar above to view its performance detail.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CHARTS ============ -->
+  <section>
+    <div class="section-head">
+      <div>
+        <div class="kicker">Reach by channel</div>
+        <h2>Where audiences met the work</h2>
+      </div>
+    </div>
+    <div class="chart-grid">
+      <div class="card"><h3>Reach by country &amp; channel</h3><div class="chart-wrap"><canvas id="chart-country"></canvas></div></div>
+      <div class="card"><h3>Outcome indicators — where measured</h3><div class="chart-wrap"><canvas id="chart-iptt"></canvas></div></div>
+    </div>
+  </section>
+
+  <!-- ============ COMPARATIVE TABLE ============ -->
+  <section>
+    <div class="section-head">
+      <div>
+        <div class="kicker">Regional snapshot</div>
+        <h2>Seven countries, side by side</h2>
+        <p>Knowledge ↑, Perception ↑, Community, Health pro, Decision-makers are outcome indicators from pre-/post-test evaluations where activities were measured.</p>
+      </div>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <table id="table"><thead><tr>
+        <th>Country</th><th>In-person</th><th>Digital reach</th><th>Media exposure</th>
+        <th>Knowledge ↑</th><th>Perception ↑</th><th>Community</th><th>Health pro</th><th>Decision-makers</th>
+      </tr></thead><tbody></tbody></table>
+    </div>
+  </section>
+
+  <!-- ============ CAMPAIGN CARDS ============ -->
+  <section>
+    <div class="section-head">
+      <div>
+        <div class="kicker">Agency-led campaigns</div>
+        <h2>The campaigns behind the numbers</h2>
+        <p>Seven agency-led narrative campaigns across the reporting period — ongoing portfolio includes CSO-led national campaigns such as Asingade, Tò Bá Ṣe Wọ́, Fupalokakamiza and Do Xa Mi.</p>
+      </div>
+    </div>
+    <div class="camp-grid" id="camp-grid"></div>
+  </section>
+
+  <!-- ============ STRATEGIC INNOVATIONS ============ -->
+  <section>
+    <div class="section-head">
+      <div>
+        <div class="kicker">Strategic innovations</div>
+        <h2>Where PAMOJA is building its next layer of capability</h2>
+        <p>Five structural bets the programme is making in 2026 — moving from project to system, from story to narrative, from campaign to ecosystem.</p>
+      </div>
+    </div>
+    <div class="innov-grid">
+      <div class="innov innov-magenta">
+        <div class="edge"></div>
+        <h4>NED — Narrative Ecosystem Design</h4>
+        <p>New SBC paradigm replacing the Sabido-era 360° campaign. From one story to an orchestrated narrative cloud — RAES designs, runs and governs interconnected actors, stories, platforms and social dynamics to stabilize narratives that shift norms and behaviours. <b>Tested in Côte d'Ivoire and Benin, scaling across the portfolio in 2026.</b></p>
+      </div>
+      <div class="innov innov-purple">
+        <div class="edge"></div>
+        <h4>LAFAAAC</h4>
+        <p>RAES training catalogue delivered via white-label mobile app + LMS (Teach on Mars / Lumapps). Builds capacity for internal teams, CSO partners and creative actors on SDGs, sexual &amp; reproductive health and the Cultural &amp; Creative Industries.</p>
+      </div>
+      <div class="innov innov-yellow">
+        <div class="edge"></div>
+        <h4>Digital studio</h4>
+        <p>In-house production capability for rapid-response creative, opposition monitoring content and platform-native storytelling across the 7-country portfolio.</p>
+      </div>
+      <div class="innov innov-ink">
+        <div class="edge"></div>
+        <h4>Opposition videos</h4>
+        <p>Monitoring, analysing and responding to opposition narratives in near-real time — defensive and offensive posture to protect the programme's narrative gains.</p>
+      </div>
+      <div class="innov innov-purple">
+        <div class="edge"></div>
+        <h4>Regional campaign design</h4>
+        <p>Cross-country narrative architecture around the draft African Charter on the Protection of the Family — PAMOJA's first regional campaign.</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="left">
+    <span class="logo">✦</span>
+    <div>
+      <div style="font-weight:700;color:var(--yellow)">PAMOJA programme · RAES</div>
+      <div style="opacity:.7;margin-top:2px">Prepared for Bloomberg Philanthropies · April 2026</div>
+    </div>
+  </div>
+  <div class="right">Data: PAMOJA M&amp;E Report — IPTT &amp; Reach Monitoring (Mar 2026)</div>
+</footer>
+
+<div id="map-tooltip"></div>
+
+<script>
+/* =====================================================
+   DATA
+===================================================== */
+const COUNTRIES = {
+  ZW: { name:"Zimbabwe", inPerson:865, digital:6760000, media:2050000, contents:207, campaigns:3,
+        iptt:{ knowledge:0.23, perception:0.20, community:0.85, health:null, decision:0.44 },
+        story:"Zimbabwe delivered one of the largest footprints of the portfolio, combining high-profile campaigns (<b>Abort the Lies, Not Her Choice, Asingade</b>) with dense media amplification. Across 85+ pieces of content, digital campaigns recorded 6.35M+ reach; 59 radio jingles and programmes delivered ~2M cumulative audience. Clause 11 of the Medical Services Amendment Bill was ultimately removed after opposition framing.",
+        next:"Keep investing in community, media and digital dialogue — add structured follow-up for decision-makers and institutional actors." },
+  MW: { name:"Malawi", inPerson:45326, digital:377800, media:2480000, contents:67, campaigns:2,
+        iptt:{ knowledge:null, perception:null, community:null, health:null, decision:null },
+        story:"Malawi presents one of the clearest visibility stories — culturally resonant public formats such as mural painting in health facilities and flash-mob theatre drove 45,326 direct participants. 10 radio pieces across 14 national and community radios generated ~2.48M listeners, reinforcing messages over time.",
+        next:"Preserve the strong public-visibility model; pair it with community activities and routine outcome capture so scale can be matched with measured change." },
+  BJ: { name:"Benin", inPerson:5026, digital:1130000, media:null, contents:111, campaigns:2,
+        iptt:{ knowledge:0.19, perception:0.20, community:0.95, health:0.97, decision:null },
+        story:"Benin combined community engagement with unusually strong health provider activation. 27 in-person activities reached 5,026 people directly; 95% of community participants and 97% of health providers committed to better support people seeking services — the clearest provider activation signal in the portfolio.",
+        next:"Benin's provider-facing model is a strong candidate for adaptation elsewhere, especially where institutional conversion remains weak. Traditional media coverage would help reach rural audiences." },
+  NG: { name:"Nigeria", inPerson:2713, digital:4580000, media:4180000, contents:248, campaigns:3,
+        iptt:{ knowledge:0.15, perception:0.15, community:0.70, health:0.66, decision:0.65 },
+        story:"Nigeria combined 3 national campaigns with community engagement, digital outreach and traditional media. +15% knowledge, +15% perception among training participants. 70% report feeling more able to speak openly; 66% of health providers committed to reduce stigma. Weaker signal among counsellors and some religious leaders — deeper norm change requires repetition and post-training mentoring.",
+        next:"Nigeria's challenge is no longer visibility; it is moving from public confidence to stronger health-provider, community-leader and policy follow-through." },
+  KE: { name:"Kenya", inPerson:null, digital:6920000, media:2680000, contents:76, campaigns:1,
+        iptt:{ knowledge:null, perception:null, community:null, health:null, decision:null },
+        story:"Kenya's story was defined by a deliberate strategy of large-scale public communication. Led by KCH through <b>Our Family, Our Choice</b>, 6 national radio programmes reached ~2.68M people; the digital push across 70 contents drove 6.92M reach and 210,909 engagements — the strongest online storytelling engine of the portfolio, powered by tailored messaging + influencer-led content.",
+        next:"Kenya has already demonstrated scale. The priority now is to connect scale to measured shifts in knowledge, perceptions and commitments — add a community layer beneath the media success." },
+  SN: { name:"Senegal", inPerson:2570, digital:5290000, media:10000, contents:166, campaigns:1,
+        iptt:{ knowledge:0.19, perception:0.15, community:0.76, health:null, decision:null },
+        story:"Senegal combined youth mobilization, artistic expression, legal advocacy and public communication. +19% knowledge, +15% perception among participants; 91% feeling ready to discuss safe abortion openly. The TikTok web series <b>Sunu marché bi</b> alone drove ~90% of 5.29M digital reach and 400,713 engagements — empathetic, culturally resonant storytelling outperforms conventional awareness content.",
+        next:"Prioritize social norm change via youth engagement and trusted messengers; build gradual coalitions before direct legislative advocacy." },
+  CI: { name:"Côte d'Ivoire", inPerson:null, digital:1270000, media:null, contents:25, campaigns:1,
+        iptt:{ knowledge:null, perception:null, community:null, health:null, decision:null },
+        story:"Agency-led <b>Parce que tu comptes</b> opened conversation in a heavily repressed environment via a deliberately media-first strategy — anonymous storytelling, influencer amplification, landing page (3,168 visits), TV debates, display advertising. The campaign generated 1.27M reach, 3.5M impressions and 600+ comments (45% negative, 25% positive, 30% ironic). In this context the first win is breaking silence and creating space for informed debate.",
+        next:"Retain the debate-opening creative approach; reinforce the explanatory layer with traditional media and influencer partnerships. Synchronize message timing across channels." }
+};
+
+const CAMPAIGNS = [
+  { name:"Not Her Choice", country:"ZW", agency:"DATCITIZEN", reach:4200000, engagements:null, contents:38, signal:"6,024 petition signatures so far", channels:"FB · IG · YouTube · TikTok · Google Display", desc:"Survivor-centered advocacy push mobilizing public pressure for safe abortion law reform. 54% women audience; 48% aged 25–34." },
+  { name:"Ajose (To Ba Se Wo)", country:"NG", agency:"OAK MEDIA", reach:2949650, engagements:575, contents:105, signal:"57% male audience reached — widening the conversation", channels:"FB · IG · Snapchat · YouTube", desc:"National narrative-change push reframing abortion conversations among Yoruba-speaking audiences — 44% aged 25–34." },
+  { name:"Parce que tu comptes", country:"CI", agency:"VOODOO CI", reach:1270357, engagements:1244, contents:25, signal:"3,168 landing-page visits; 600+ public comments", channels:"FB · IG · TikTok · Google Display", desc:"Media-first campaign opening conversation in a heavily stigmatized environment — anonymous storytelling, influencer amplification, display advertising." },
+  { name:"J'ai quelque chose à te dire", country:"BJ", agency:"WALLACE", reach:926132, engagements:5615, contents:56, signal:"60% male audience reached; strong digital engagement", channels:"FB · IG · YouTube · TikTok · Google Display", desc:"Benin narrative push combining public storytelling with community engagement — supports the country's provider activation layer." },
+  { name:"Abort the Lies", country:"ZW", agency:"TBWA", reach:2975902, engagements:689, contents:85, signal:"55 radio jingles on 2 stations · 825K media audience", channels:"FB · IG · YouTube · TikTok · Google Display + Radio", desc:"Flagship TBWA-led Zimbabwe campaign combining digital narrative with mass-radio amplification." },
+  { name:"Tonsediamalawi", country:"MW", agency:"YOUNG VOICES", reach:457000, engagements:6659, contents:38, signal:"3 radio pieces; strong digital engagement", channels:"FB · IG · TikTok + Radio", desc:"Youth-voice campaign on safe choices — digital-first distribution paired with community radio programming." },
+  { name:"Our Family, Our Choice", country:"KE", agency:"KCH", reach:9607802, engagements:210909, contents:68, signal:"6 national radio programmes · 2.68M listeners", channels:"FB · IG · TikTok + Radio", desc:"Kenya's flagship multi-channel campaign — the strongest online storytelling engine of the portfolio, powered by doctors, legal experts & women's testimonies." }
+];
+
+/* =====================================================
+   UTILS
+===================================================== */
+const fmt = n => n == null ? "—" : n >= 1e6 ? (n/1e6).toFixed(2).replace(/\.00$/,"")+"M" : n.toLocaleString("en-US");
+const fmtFull = n => n == null ? "—" : n.toLocaleString("en-US");
+const fmtPct = n => n == null ? "—" : Math.round(n*100)+"%";
+
+/* =====================================================
+   AFRICA MAP — simplified SVG
+   Only 7 PAMOJA countries clickable; others grey silhouettes.
+===================================================== */
+const AFRICA_PATHS = [
+  // North & West grey silhouettes (simplified shapes — decorative, non-geographic)
+  { id:"xx1", d:"M 110 120 L 210 115 L 275 145 L 280 190 L 245 205 L 195 200 L 140 185 L 115 160 Z", type:"other" }, // NW
+  { id:"xx2", d:"M 280 120 L 360 125 L 390 165 L 380 195 L 340 200 L 295 195 L 285 160 Z", type:"other" }, // NE (Egypt-ish)
+  { id:"xx3", d:"M 80 200 L 145 195 L 175 220 L 165 250 L 135 260 L 95 245 L 75 225 Z", type:"other" }, // Mauritania
+  { id:"xx4", d:"M 300 200 L 355 195 L 400 210 L 395 240 L 365 255 L 320 250 L 295 235 Z", type:"other" }, // Sudan
+  { id:"xx5", d:"M 260 260 L 295 250 L 320 270 L 305 295 L 275 295 L 250 280 Z", type:"other" }, // Chad/CAR
+  { id:"xx6", d:"M 175 250 L 225 255 L 250 275 L 240 300 L 210 310 L 180 290 Z", type:"other" }, // Niger/Burkina
+  { id:"xx7", d:"M 320 295 L 360 295 L 385 320 L 370 345 L 340 345 L 315 325 Z", type:"other" }, // DRC top
+  { id:"xx8", d:"M 300 345 L 360 345 L 380 380 L 360 410 L 320 410 L 295 390 Z", type:"other" }, // DRC bottom / Angola
+  { id:"xx9", d:"M 400 250 L 440 260 L 450 290 L 430 310 L 405 290 Z", type:"other" }, // Ethiopia
+  { id:"xx10", d:"M 230 445 L 270 440 L 295 460 L 285 485 L 260 495 L 235 480 Z", type:"other" }, // Botswana/SA top
+  { id:"xx11", d:"M 250 500 L 310 500 L 330 530 L 310 560 L 270 565 L 240 540 Z", type:"other" }, // South Africa
+  // PAMOJA countries
+  { id:"SN", name:"Senegal", d:"M 75 225 L 130 222 L 145 245 L 135 262 L 105 265 L 75 250 Z" },
+  { id:"CI", name:"Côte d'Ivoire", d:"M 160 280 L 205 280 L 220 305 L 215 330 L 190 340 L 165 325 L 155 300 Z" },
+  { id:"BJ", name:"Benin", d:"M 230 300 L 252 298 L 260 320 L 255 340 L 240 345 L 228 325 Z" },
+  { id:"NG", name:"Nigeria", d:"M 255 290 L 295 290 L 310 315 L 300 340 L 275 345 L 253 330 L 250 310 Z" },
+  { id:"KE", name:"Kenya", d:"M 395 305 L 435 310 L 445 335 L 430 355 L 405 355 L 390 335 Z" },
+  { id:"MW", name:"Malawi", d:"M 380 410 L 405 415 L 415 445 L 400 470 L 385 460 L 378 435 Z" },
+  { id:"ZW", name:"Zimbabwe", d:"M 320 440 L 365 440 L 380 465 L 370 490 L 340 495 L 318 475 Z" }
+];
+
+const svg = document.getElementById("map");
+svg.setAttribute("viewBox","0 0 500 600");
+AFRICA_PATHS.forEach(p => {
+  const el = document.createElementNS("http://www.w3.org/2000/svg","path");
+  el.setAttribute("d", p.d);
+  el.setAttribute("class", "country-path" + (p.type==="other" ? "" : " pamoja"));
+  if (p.type !== "other") {
+    el.setAttribute("data-country", p.id);
+    el.setAttribute("data-name", p.name);
+    el.addEventListener("click", () => selectCountry(p.id));
+    el.addEventListener("mouseenter", e => showTooltip(e, p.id));
+    el.addEventListener("mousemove", moveTooltip);
+    el.addEventListener("mouseleave", hideTooltip);
+  }
+  svg.appendChild(el);
+});
+// Caption labels
+const captions = [
+  { id:"SN", x:95, y:265 },
+  { id:"CI", x:180, y:345 },
+  { id:"BJ", x:240, y:355 },
+  { id:"NG", x:278, y:360 },
+  { id:"KE", x:415, y:368 },
+  { id:"MW", x:395, y:478 },
+  { id:"ZW", x:345, y:505 }
+];
+captions.forEach(c => {
+  const t = document.createElementNS("http://www.w3.org/2000/svg","text");
+  t.setAttribute("x", c.x);
+  t.setAttribute("y", c.y);
+  t.setAttribute("text-anchor","middle");
+  t.setAttribute("font-size","11");
+  t.setAttribute("font-family","Inter,sans-serif");
+  t.setAttribute("font-weight","700");
+  t.setAttribute("fill","#1A1A1A");
+  t.setAttribute("pointer-events","none");
+  t.textContent = c.id;
+  svg.appendChild(t);
+});
+
+const tooltip = document.getElementById("map-tooltip");
+function showTooltip(e, id) {
+  const c = COUNTRIES[id];
+  if (!c) return;
+  tooltip.innerHTML = `<strong>${c.name}</strong>Reach: ${fmt(totalReach(c))}<br>Digital: ${fmt(c.digital)}<br>Media: ${fmt(c.media)}`;
+  tooltip.style.opacity = 1;
+  moveTooltip(e);
+}
+function moveTooltip(e){
+  tooltip.style.left = (e.clientX + 14) + "px";
+  tooltip.style.top = (e.clientY + 14) + "px";
+}
+function hideTooltip(){ tooltip.style.opacity = 0; }
+
+/* =====================================================
+   STATE & RENDER
+===================================================== */
+let currentFilter = "all";
+function totalReach(c) {
+  return (c.digital||0) + (c.media||0) + (c.inPerson||0);
+}
+
+function updateKPIs() {
+  let reach=0, dig=0, med=0, ip=0, cont=0, camp=0;
+  const relevant = currentFilter === "all" ? Object.values(COUNTRIES) : [COUNTRIES[currentFilter]];
+  relevant.forEach(c => {
+    dig  += c.digital||0;
+    med  += c.media||0;
+    ip   += c.inPerson||0;
+    cont += c.contents||0;
+    camp += c.campaigns||0;
+  });
+  reach = dig + med + ip;
+  const allContentsFull = 689;
+  const allPartners = 40;
+  const set = (sel, val) => document.querySelector(`[data-kpi="${sel}"]`).textContent = val;
+  const setLabel = (sel, lbl, sub) => {
+    document.querySelector(`[data-kpi-label="${sel}"]`).textContent = lbl;
+    document.querySelector(`[data-kpi-sub="${sel}"]`).textContent = sub;
+  };
+  if (currentFilter === "all") {
+    set("reach","37,822,599");
+    set("digital","26,354,448");
+    set("media","11,411,651");
+    set("inperson","56,500");
+    set("contents","689");
+    set("partners","40");
+    setLabel("partners","Partnerships mobilized","Local CSOs and creative agencies");
+  } else {
+    set("reach", fmtFull(reach));
+    set("digital", fmtFull(dig));
+    set("media", med ? fmtFull(med) : "—");
+    set("inperson", ip ? fmtFull(ip) : "—");
+    set("contents", fmtFull(cont));
+    set("partners", fmtFull(camp));
+    setLabel("partners","Campaigns in-country","Agency-led + CSO-led during reporting period");
+  }
+  document.getElementById("kpi-title").textContent =
+    currentFilter === "all"
+      ? "What the funding enabled across the portfolio"
+      : "What the funding enabled in " + COUNTRIES[currentFilter].name;
+}
+
+function renderTable() {
+  const tbody = document.querySelector("#table tbody");
+  const ids = ["ZW","MW","BJ","NG","KE","SN","CI"];
+  tbody.innerHTML = "";
+  ids.forEach(id => {
+    const c = COUNTRIES[id];
+    const tr = document.createElement("tr");
+    tr.dataset.country = id;
+    tr.innerHTML = `
+      <td><strong>${c.name}</strong></td>
+      <td class="num ${c.inPerson?'':'dash'}">${fmt(c.inPerson)}</td>
+      <td class="num">${fmt(c.digital)}</td>
+      <td class="num ${c.media?'':'dash'}">${fmt(c.media)}</td>
+      <td class="num ${c.iptt.knowledge!=null?'':'dash'}">${fmtPct(c.iptt.knowledge)}${c.iptt.knowledge!=null?`<div class="pct-bar"><span style="width:${c.iptt.knowledge*300}%"></span></div>`:""}</td>
+      <td class="num ${c.iptt.perception!=null?'':'dash'}">${fmtPct(c.iptt.perception)}</td>
+      <td class="num ${c.iptt.community!=null?'':'dash'}">${fmtPct(c.iptt.community)}</td>
+      <td class="num ${c.iptt.health!=null?'':'dash'}">${fmtPct(c.iptt.health)}</td>
+      <td class="num ${c.iptt.decision!=null?'':'dash'}">${fmtPct(c.iptt.decision)}</td>
+    `;
+    tr.addEventListener("click", () => selectCountry(id));
+    tbody.appendChild(tr);
+  });
+  // total row
+  const total = document.createElement("tr");
+  total.className = "total";
+  total.innerHTML = `<td>Regional PAMOJA</td><td class="num">56,500</td><td class="num">26.35M</td><td class="num">11.41M</td><td class="num">19%</td><td class="num">17%</td><td class="num">81%</td><td class="num">81%</td><td class="num">54%</td>`;
+  tbody.appendChild(total);
+}
+
+function renderCampaigns() {
+  const grid = document.getElementById("camp-grid");
+  grid.innerHTML = "";
+  const list = currentFilter === "all" ? CAMPAIGNS : CAMPAIGNS.filter(c => c.country === currentFilter);
+  if (!list.length) {
+    grid.innerHTML = `<div style="grid-column:1/-1;padding:30px;text-align:center;color:var(--ink-soft);font-size:13px">No agency-led campaign for <strong>${COUNTRIES[currentFilter]?.name||currentFilter}</strong> in the reporting period — see the narrative report for CSO-led national campaigns.</div>`;
+    return;
+  }
+  list.forEach(c => {
+    const el = document.createElement("div");
+    el.className = "camp";
+    const engagementsHtml = c.engagements != null ? `<div class="item"><div class="v">${fmtFull(c.engagements)}</div><div class="k">engagements</div></div>` : "";
+    el.innerHTML = `
+      <div class="edge"></div>
+      <h4>${c.name}</h4>
+      <div class="meta">${COUNTRIES[c.country].name} · ${c.agency}</div>
+      <div class="desc">${c.desc}</div>
+      <div class="reach">
+        <div class="item"><div class="v">${fmt(c.reach)}</div><div class="k">reach</div></div>
+        ${engagementsHtml}
+        <div class="item"><div class="v">${c.contents}</div><div class="k">contents</div></div>
+      </div>
+      <div class="signal">${c.signal}</div>
+      <div class="channels">${c.channels}</div>
+    `;
+    grid.appendChild(el);
+  });
+}
+
+function selectCountry(id) {
+  currentFilter = id;
+  document.querySelectorAll(".chip").forEach(ch => ch.classList.toggle("active", ch.dataset.filter === id));
+  document.querySelectorAll("#map .pamoja").forEach(el => el.classList.toggle("selected", el.dataset.country === id));
+  renderDetail(id);
+  updateKPIs();
+  renderCampaigns();
+  document.querySelectorAll("#table tbody tr").forEach(tr => tr.style.background = tr.dataset.country === id ? "var(--cream)" : "");
+  renderCharts();
+  window.scrollTo({ top: document.querySelector(".two-col").offsetTop - 80, behavior: "smooth" });
+}
+
+function clearFilter() {
+  currentFilter = "all";
+  document.querySelectorAll(".chip").forEach(ch => ch.classList.toggle("active", ch.dataset.filter === "all"));
+  document.querySelectorAll("#map .pamoja").forEach(el => el.classList.remove("selected"));
+  renderDetailEmpty();
+  updateKPIs();
+  renderCampaigns();
+  document.querySelectorAll("#table tbody tr").forEach(tr => tr.style.background = "");
+  renderCharts();
+}
+
+function renderDetail(id) {
+  const c = COUNTRIES[id];
+  const ipttRows = [
+    { k:"Knowledge ↑", v:c.iptt.knowledge },
+    { k:"Perception ↑", v:c.iptt.perception },
+    { k:"Community commit.", v:c.iptt.community },
+    { k:"Health providers", v:c.iptt.health },
+    { k:"Decision-makers", v:c.iptt.decision }
+  ].filter(r => r.v != null);
+  document.getElementById("detail").innerHTML = `
+    <div class="country-head">
+      <h3>${c.name}</h3>
+      <span class="tag">PAMOJA country</span>
+    </div>
+    <div class="country-stats">
+      <div class="s"><div class="v">${fmt(c.digital)}</div><div class="k">Digital reach</div></div>
+      <div class="s"><div class="v">${fmt(c.media)}</div><div class="k">Media exposure</div></div>
+      <div class="s"><div class="v">${c.inPerson ? fmt(c.inPerson) : "—"}</div><div class="k">In-person</div></div>
+    </div>
+    <div class="country-story">${c.story}</div>
+    ${ipttRows.length ? `<div class="iptt-list">${ipttRows.map(r => `<div class="row"><div class="lbl">${r.k}</div><div class="val">${fmtPct(r.v)}</div></div>`).join("")}</div>` : `<div class="banner-note">Outcome percentages on knowledge, perception, and commitment were not recorded in the data provided for ${c.name} during this reporting period.</div>`}
+    <div class="next-phase"><b>Next phase</b>${c.next}</div>
+  `;
+}
+
+function renderDetailEmpty() {
+  document.getElementById("detail").innerHTML = `
+    <div style="padding:60px 30px;text-align:center;color:var(--ink-soft)">
+      <div style="font-size:48px;color:var(--yellow);margin-bottom:8px">✦</div>
+      <div style="font-size:14px">Select a country on the map or from the filter bar above to view its performance detail.</div>
+    </div>
+  `;
+}
+
+/* =====================================================
+   CHARTS
+===================================================== */
+let chartCountry, chartIPTT;
+Chart.defaults.font.family = "Inter, sans-serif";
+Chart.defaults.color = "#4A4A4A";
+
+function renderCharts() {
+  const ids = currentFilter === "all" ? ["ZW","MW","BJ","NG","KE","SN","CI"] : [currentFilter];
+  const labels = ids.map(id => COUNTRIES[id].name);
+  const digital = ids.map(id => Math.round((COUNTRIES[id].digital||0)/1e6 * 100)/100);
+  const media   = ids.map(id => Math.round((COUNTRIES[id].media||0)/1e6 * 100)/100);
+  const inPer   = ids.map(id => Math.round((COUNTRIES[id].inPerson||0)/1000 * 100)/100); // in thousands
+  const ctx1 = document.getElementById("chart-country");
+  if (chartCountry) chartCountry.destroy();
+  chartCountry = new Chart(ctx1, {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [
+        { label:"Digital reach (M)", data: digital, backgroundColor:"#49267A", borderRadius:4 },
+        { label:"Media exposure (M)", data: media, backgroundColor:"#E62B67", borderRadius:4 },
+        { label:"In-person (thousands)", data: inPer, backgroundColor:"#F8C501", borderRadius:4 }
+      ]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ position:"bottom", labels:{ usePointStyle:true, pointStyle:"rectRounded", boxWidth:10 } },
+                tooltip:{ callbacks:{ label:(ctx)=> `${ctx.dataset.label}: ${ctx.parsed.y}` } } },
+      scales:{ x:{ grid:{ display:false } }, y:{ grid:{ color:"#EEE" }, beginAtZero:true } }
+    }
+  });
+
+  // IPTT radar
+  const iPos = ids.filter(id => Object.values(COUNTRIES[id].iptt).some(v => v != null));
+  const ctx2 = document.getElementById("chart-iptt");
+  if (chartIPTT) chartIPTT.destroy();
+  chartIPTT = new Chart(ctx2, {
+    type: "radar",
+    data: {
+      labels: ["Knowledge ↑","Perception ↑","Community","Health pro","Decision-makers"],
+      datasets: iPos.map((id, i) => ({
+        label: COUNTRIES[id].name,
+        data: [
+          (COUNTRIES[id].iptt.knowledge||0)*100,
+          (COUNTRIES[id].iptt.perception||0)*100,
+          (COUNTRIES[id].iptt.community||0)*100,
+          (COUNTRIES[id].iptt.health||0)*100,
+          (COUNTRIES[id].iptt.decision||0)*100
+        ],
+        backgroundColor: ["rgba(73,38,122,.12)","rgba(230,43,103,.12)","rgba(248,197,1,.15)","rgba(26,26,26,.08)","rgba(73,38,122,.12)","rgba(230,43,103,.12)","rgba(248,197,1,.15)"][i%7],
+        borderColor: ["#49267A","#E62B67","#C49B00","#1A1A1A","#49267A","#E62B67","#C49B00"][i%7],
+        pointBackgroundColor: ["#49267A","#E62B67","#C49B00","#1A1A1A","#49267A","#E62B67","#C49B00"][i%7],
+        borderWidth:2
+      }))
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ position:"bottom", labels:{ boxWidth:10, usePointStyle:true } } },
+      scales:{ r:{ min:0, max:100, ticks:{ stepSize:20, callback:(v)=>v+"%" }, pointLabels:{ font:{ size:11 } } } }
+    }
+  });
+}
+
+/* =====================================================
+   INIT
+===================================================== */
+document.querySelectorAll(".chip").forEach(chip => {
+  chip.addEventListener("click", () => {
+    const f = chip.dataset.filter;
+    if (f === "all") clearFilter(); else selectCountry(f);
+  });
+});
+
+renderTable();
+renderCampaigns();
+updateKPIs();
+renderCharts();
+</script>
+</body>
+</html>
